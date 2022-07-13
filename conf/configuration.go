@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gobwas/glob"
@@ -351,6 +352,12 @@ func (config *Configuration) ApplyDefaults() {
 		config.URIAllowList = []string{}
 	}
 	if config.URIAllowList != nil {
+		for i, item := range config.URIAllowList {
+			// remove trailing slashes from the glob as they may confuse users
+			// when passing redirect_to URLs with or without slashes at the end
+			config.URIAllowList[i] = strings.TrimSuffix(item, "/")
+		}
+
 		config.URIAllowListMap = make(map[string]glob.Glob)
 		for _, uri := range config.URIAllowList {
 			g := glob.MustCompile(uri, '.', '/')
